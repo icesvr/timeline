@@ -30,14 +30,26 @@ export class TimelineScaleComponent {
       {timestamp:1691719094},
       {timestamp:1691715494}    
     ]
+    
   }
 
   ngOnInit():void{
     this.ctx = this.canvasRef.nativeElement.getContext('2d');
 
     this.canvasEvent();
-    
+
+
+
+
+    //bien
     this.timeLine();
+    
+    //APITIMELINEPARAMS(fecha(tiempo relativo,timestamp),zoomLevel)
+    //drawRenderTimeline(Response de la api)
+    //-Linea de tiempo (Cantidad de horas??'', )
+    //-eventos(array de eventos con TIMESTAMP**)
+    //-interacciones(listener(features extras)) <- podria ser una constante
+
   }
 
   draw(){
@@ -59,19 +71,19 @@ export class TimelineScaleComponent {
   }
 
   getLocation(e:any){
-    console.log(e);
+    //console.log(e);
     const location:Location = { x:0, y:0};
     
     if (e.touches && e.touches.length == 1)
     {
       location.x =  e.touches[0].clientX;
-      location.y =  e.touches[0].clientY;
+      //location.y =  e.touches[0].clientY;
        
     }
     else if (e.clientX && e.clientY)
     {
       location.x = e.clientX;
-      location.y = e.clientY;
+      //location.y = e.clientY;
               
     }
 
@@ -109,6 +121,7 @@ export class TimelineScaleComponent {
     this.canvasRef.nativeElement.addEventListener('mousemove', (e:any) => {
       if (this.isDragging){
         this.cameraOffset.x = this.getLocation(e).x/1 - this.dragStart.x
+        console.log(this.cameraOffset.x);
         this.cameraOffset.y = this.getLocation(e).y/1 - this.dragStart.y
         // this.draw()
         this.timeLine()
@@ -136,6 +149,8 @@ export class TimelineScaleComponent {
     })
 
     this.canvasRef.nativeElement.addEventListener( 'click', (e:any) => {
+      this.cameraOffset.x = this.getLocation(e).x/1 - this.dragStart.x
+        console.log(this.cameraOffset.x);
       // console.log('su click: ',e);
       // alert(e)
     })
@@ -145,8 +160,9 @@ export class TimelineScaleComponent {
   timeLine():void{
     this.canvasRef.nativeElement.width = window.innerWidth
     this.canvasRef.nativeElement.height = window.innerHeight
-   
     //this.ctx.translate( window.innerWidth / 2, window.innerHeight / 2 )
+    console.log('WI: ',-window.innerWidth);
+    console.log('off;: ',this.cameraOffset.x);
     this.ctx.scale(this.cameraZoom, this.cameraZoom)
     this.ctx.translate( -window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y )
     this.ctx.clearRect(0,0, window.innerWidth, window.innerHeight)
@@ -161,7 +177,11 @@ export class TimelineScaleComponent {
     const startY = this.ctx.canvas.height / 2;
   
     this.line(startY)
-
+    //this.line(startY,window.innerWidth)
+    let innerWidth = -window.innerWidth
+    //console.log('INNERWIDTHÑ ',-window.innerWidth);
+    //this.line(startY,-window.innerWidth)
+    this.line(startY,-window.innerWidth*1)
     for (let i = hours; i >= 0; i -= 1) {
       const x = startX + i * pixelsPerHour;
       this.ctx.beginPath();
@@ -181,19 +201,59 @@ export class TimelineScaleComponent {
     window.requestAnimationFrame( () => this.timeLine );
   }
 
+  timeLine2():void{
+    this.canvasRef.nativeElement.width = window.innerWidth
+    this.canvasRef.nativeElement.height = window.innerHeight
+    //this.ctx.translate( window.innerWidth / 2, window.innerHeight / 2 )
+    this.ctx.scale(this.cameraZoom, this.cameraZoom)
+    this.ctx.translate( -window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y )
+    this.ctx.clearRect(0,0, window.innerWidth, window.innerHeight)
+
+    const now = new Date(); // Obtener la fecha actual
+  
+    const hours = 24; // Número de horas que deseas mostrar en el timeline
+    const pixelsPerHour = this.ctx.canvas.width / hours; // Cantidad de píxeles por hora en el timeline
+  
+    // Calcular la posición del punto inicial del timeline
+    const startX = this.ctx.canvas.width - hours * pixelsPerHour;
+    const startY = 100;
+  
+    this.line(startY)
+
+    for (let i = hours; i >= 0; i -= 1) {
+      const x = startX + i * pixelsPerHour;
+      this.ctx.beginPath();
+      this.ctx.moveTo(x, startY - 10);
+      this.ctx.lineTo(x, startY + 10);
+      this.ctx.stroke();
+      
+      // Mostrar la hora del evento
+      const eventTime = new Date(now.getTime() + i * 60 * 60 * 1000);
+      //console.log('aaa: ',eventTime.getHours());
+      const timeText = eventTime.getHours() + ':00';
+      this.ctx.fillText(timeText, x - 15, startY + 25);
+    }
+
+    this.drawEvent(startX, pixelsPerHour)
+
+    window.requestAnimationFrame( () => this.timeLine2 );
+  }
+
+
+
   drawEvent(startX:number, pixelsPerHour:any):void{
     
     this.timeStampList.map((data,i) => {
       const date = new Date(data?.timestamp * 1000);
       const hour = date.getHours();
-      console.log(hour);
+      //console.log(hour);
       const min = date.getMinutes();
        const eventTimeX =   (1+hour + min / 60) * pixelsPerHour; //eventTimeX =   (1+hour + min / 60) * pixelsPerHour;
-       console.log('eventoTime: ',eventTimeX);
+       //console.log('eventoTime: ',eventTimeX);
         const eventTimeY = 50;
 
         const event = new Event(eventTimeX,(window.innerHeight / 2), -20,100);
-        console.log(event);
+        //console.log(event);
         event.draw(this.ctx)
         // Dibujar el círculo verde del evento
         // this.ctx.fillStyle = 'red';
@@ -209,7 +269,7 @@ export class TimelineScaleComponent {
       
 
     });
-    console.log(this.timeStampList);
+    //console.log(this.timeStampList);
     // const eventHour = 3
     // const eventMin = 30;
 
@@ -231,17 +291,19 @@ export class TimelineScaleComponent {
 
   }
 
-  line(startY:number):void{
+  line(startY:number,startX:number=0):void{
     
     this.ctx.strokeStyle = 'black';
     this.ctx.lineWidth = 2;
   
     this.ctx.beginPath();
-    this.ctx.moveTo(0, window.innerHeight / 2);
+    this.ctx.moveTo(startX, startY);
     this.ctx.lineTo(window.innerWidth, startY);
     this.ctx.lineTo(this.ctx.canvas.width, startY);
     this.ctx.stroke();
   }
+
+
 
 
 }
