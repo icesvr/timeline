@@ -1,8 +1,8 @@
-export class Event{
-    x;
-    y;
-    radius;
-    color;
+export class TimeLine{
+    start=0
+    cwidh:number=0
+    color='red'
+    txt:string='';
     constructor(x:number, y:number, radius:number, color:number){
         this.x = x;
         this.y = y;

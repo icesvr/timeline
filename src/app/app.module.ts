@@ -7,6 +7,7 @@ import { TimelineComponent } from './components/timeline/timeline.component';
 import { TimelineCanvasComponent } from './components/timeline-canvas/timeline-canvas.component';
 import { TimelineZoomComponent } from './components/timeline-zoom/timeline-zoom.component';
 import { TimelineScaleComponent } from './components/timeline-scale/timeline-scale.component';
+import { TimeComponent } from './components/time/time.component';
 
 @NgModule({
   declarations: [
@@ -14,7 +15,8 @@ import { TimelineScaleComponent } from './components/timeline-scale/timeline-sca
     TimelineComponent,
     TimelineCanvasComponent,
     TimelineZoomComponent,
-    TimelineScaleComponent
+    TimelineScaleComponent,
+    TimeComponent
   ],
   imports: [
     BrowserModule,
